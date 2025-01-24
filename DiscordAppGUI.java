@@ -1,7 +1,4 @@
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URI;
@@ -10,68 +7,141 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Base64;
 import javax.imageio.ImageIO;
+import javax.swing.*;
 
 public class DiscordAppGUI {
     private JFrame frame;
-    private JTextField accessTokenField;
-    private JLabel imageLabel;
-    private File selectedFile;
+    private JTabbedPane tabbedPane;
+    private JTextField discordTokenField, twitterTokenField, instagramTokenField;
+    private JLabel discordImageLabel, twitterImageLabel, instagramImageLabel;
+    private File discordSelectedFile, twitterSelectedFile, instagramSelectedFile;
 
     public DiscordAppGUI() {
-        // Initialize the frame
-        frame = new JFrame("Discord Avatar Updater");
+        frame = new JFrame("Profile Updater");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(500, 400);
-        frame.setLayout(new BorderLayout());
+        frame.setSize(600, 500);
 
-        // Create and set up components
-        JPanel inputPanel = new JPanel(new GridLayout(3, 1));
-        JLabel tokenLabel = new JLabel("Access Token:");
-        accessTokenField = new JTextField();
-        JButton selectImageButton = new JButton("Select Image");
-        imageLabel = new JLabel("No image selected", SwingConstants.CENTER);
-        imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        tabbedPane = new JTabbedPane();
 
-        selectImageButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                selectImage();
-            }
-        });
+        // Add tabs
+        tabbedPane.addTab("Discord", createDiscordTab());
+        tabbedPane.addTab("Twitter", createTwitterTab());
+        tabbedPane.addTab("Instagram", createInstagramTab());
 
-        inputPanel.add(tokenLabel);
-        inputPanel.add(accessTokenField);
-        inputPanel.add(selectImageButton);
-
-        JButton uploadButton = new JButton("Upload Avatar");
-        uploadButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                uploadAvatar();
-            }
-        });
-
-        // Add components to the frame
-        frame.add(inputPanel, BorderLayout.NORTH);
-        frame.add(imageLabel, BorderLayout.CENTER);
-        frame.add(uploadButton, BorderLayout.SOUTH);
-
+        frame.add(tabbedPane);
         frame.setVisible(true);
     }
 
-    private void selectImage() {
+    // Create the Discord Tab
+    private JPanel createDiscordTab() {
+        JPanel panel = new JPanel(new BorderLayout());
+        JPanel inputPanel = new JPanel(new GridLayout(3, 1));
+
+        JLabel tokenLabel = new JLabel("Discord Access Token:");
+        discordTokenField = new JTextField();
+        JButton selectImageButton = new JButton("Select Image");
+        discordImageLabel = new JLabel("No image selected", SwingConstants.CENTER);
+        discordImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        selectImageButton.addActionListener(e -> selectImage("Discord"));
+
+        inputPanel.add(tokenLabel);
+        inputPanel.add(discordTokenField);
+        inputPanel.add(selectImageButton);
+
+        JButton uploadButton = new JButton("Update Discord Avatar");
+        uploadButton.addActionListener(e -> uploadDiscordAvatar());
+
+        panel.add(inputPanel, BorderLayout.NORTH);
+        panel.add(discordImageLabel, BorderLayout.CENTER);
+        panel.add(uploadButton, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    // Create the Twitter Tab (Placeholder for now)
+    private JPanel createTwitterTab() {
+        JPanel panel = new JPanel(new BorderLayout());
+        JPanel inputPanel = new JPanel(new GridLayout(3, 1));
+
+        JLabel tokenLabel = new JLabel("Twitter Access Token:");
+        twitterTokenField = new JTextField();
+        JButton selectImageButton = new JButton("Select Image");
+        twitterImageLabel = new JLabel("No image selected", SwingConstants.CENTER);
+        twitterImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        selectImageButton.addActionListener(e -> selectImage("Twitter"));
+
+        inputPanel.add(tokenLabel);
+        inputPanel.add(twitterTokenField);
+        inputPanel.add(selectImageButton);
+
+        JButton uploadButton = new JButton("Update Twitter Profile");
+        uploadButton.addActionListener(e -> JOptionPane.showMessageDialog(frame, "Feature coming soon!", "Info", JOptionPane.INFORMATION_MESSAGE));
+
+        panel.add(inputPanel, BorderLayout.NORTH);
+        panel.add(twitterImageLabel, BorderLayout.CENTER);
+        panel.add(uploadButton, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    // Create the Instagram Tab (Placeholder for now)
+    private JPanel createInstagramTab() {
+        JPanel panel = new JPanel(new BorderLayout());
+        JPanel inputPanel = new JPanel(new GridLayout(3, 1));
+
+        JLabel tokenLabel = new JLabel("Instagram Access Token:");
+        instagramTokenField = new JTextField();
+        JButton selectImageButton = new JButton("Select Image");
+        instagramImageLabel = new JLabel("No image selected", SwingConstants.CENTER);
+        instagramImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        selectImageButton.addActionListener(e -> selectImage("Instagram"));
+
+        inputPanel.add(tokenLabel);
+        inputPanel.add(instagramTokenField);
+        inputPanel.add(selectImageButton);
+
+        JButton uploadButton = new JButton("Update Instagram Profile");
+        uploadButton.addActionListener(e -> JOptionPane.showMessageDialog(frame, "Feature coming soon!", "Info", JOptionPane.INFORMATION_MESSAGE));
+
+        panel.add(inputPanel, BorderLayout.NORTH);
+        panel.add(instagramImageLabel, BorderLayout.CENTER);
+        panel.add(uploadButton, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    // Select Image based on the tab
+    private void selectImage(String platform) {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         int returnValue = fileChooser.showOpenDialog(frame);
 
         if (returnValue == JFileChooser.APPROVE_OPTION) {
-            selectedFile = fileChooser.getSelectedFile();
+            File selectedFile = fileChooser.getSelectedFile();
             try {
-                // Load the image file and display it
                 BufferedImage image = ImageIO.read(selectedFile);
-                Image scaledImage = image.getScaledInstance(200, 200, Image.SCALE_SMOOTH);
-                imageLabel.setIcon(new ImageIcon(scaledImage));
-                imageLabel.setText(""); // Clear the text
+                Image scaledImage = image.getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+
+                switch (platform) {
+                    case "Discord":
+                        discordSelectedFile = selectedFile;
+                        discordImageLabel.setIcon(new ImageIcon(scaledImage));
+                        discordImageLabel.setText("");
+                        break;
+                    case "Twitter":
+                        twitterSelectedFile = selectedFile;
+                        twitterImageLabel.setIcon(new ImageIcon(scaledImage));
+                        twitterImageLabel.setText("");
+                        break;
+                    case "Instagram":
+                        instagramSelectedFile = selectedFile;
+                        instagramImageLabel.setIcon(new ImageIcon(scaledImage));
+                        instagramImageLabel.setText("");
+                        break;
+                }
             } catch (IOException e) {
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(frame, "Error loading the image: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -79,32 +149,29 @@ public class DiscordAppGUI {
         }
     }
 
-    private void uploadAvatar() {
-        if (accessTokenField.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(frame, "Access token is required!", "Error", JOptionPane.ERROR_MESSAGE);
+    // Upload Discord Avatar
+    private void uploadDiscordAvatar() {
+        if (discordTokenField.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(frame, "Discord access token is required!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        if (selectedFile == null) {
-            JOptionPane.showMessageDialog(frame, "Please select an image!", "Error", JOptionPane.ERROR_MESSAGE);
+        if (discordSelectedFile == null) {
+            JOptionPane.showMessageDialog(frame, "Please select an image for Discord!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         try {
-            // Resize the image to 128x128
-            BufferedImage resizedImage = resizeImage(selectedFile, 128, 128);
-
-            // Convert the resized image to a Base64 string
+            BufferedImage resizedImage = resizeImage(discordSelectedFile, 128, 128);
             String base64Image = "data:image/png;base64," + encodeImageToBase64(resizedImage);
 
-            // Send the avatar update request
-            String accessToken = accessTokenField.getText();
+            String accessToken = discordTokenField.getText();
             boolean success = sendUpdateRequest(accessToken, base64Image);
 
             if (success) {
-                JOptionPane.showMessageDialog(frame, "Avatar updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Discord avatar updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(frame, "Failed to update avatar. Check your access token and try again.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Failed to update Discord avatar. Check your access token.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -130,10 +197,8 @@ public class DiscordAppGUI {
 
     private boolean sendUpdateRequest(String accessToken, String base64Image) {
         try {
-            // Create the JSON payload
             String jsonPayload = "{\"avatar\":\"" + base64Image + "\"}";
 
-            // Create the HTTP request
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://discord.com/api/v9/users/@me"))
                     .header("Authorization", "Bearer " + accessToken)
@@ -141,11 +206,9 @@ public class DiscordAppGUI {
                     .method("PATCH", HttpRequest.BodyPublishers.ofString(jsonPayload))
                     .build();
 
-            // Send the request
             HttpClient client = HttpClient.newHttpClient();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // Check the response code
             if (response.statusCode() == 200) {
                 return true;
             } else {
@@ -159,7 +222,6 @@ public class DiscordAppGUI {
     }
 
     public static void main(String[] args) {
-        // Run the GUI application
         SwingUtilities.invokeLater(DiscordAppGUI::new);
     }
 }
